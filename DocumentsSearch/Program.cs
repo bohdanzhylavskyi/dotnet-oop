@@ -1,6 +1,8 @@
 ﻿using DocumentsSearch.Documents;
 using DocumentsSearch.DocumentsStores;
 using DocumentsSearch.DocumentStores;
+using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices;
 
 namespace DocumentsSearch
 {
@@ -10,6 +12,15 @@ namespace DocumentsSearch
 
         static void Main(string[] args)
         {
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .AddDebug()
+                    .SetMinimumLevel(LogLevel.Information);
+            });
+
+
+
             var docTypesRegistry = new DocumentTypesRegistry();
 
             docTypesRegistry.Register(DocumentType.Book, typeof(Book));
@@ -25,10 +36,12 @@ namespace DocumentsSearch
                 {
                     config = new Dictionary<DocumentType, DocumentTypeCacheConfiguration>()
                     {
-                        { DocumentType.Book, new DocumentTypeCacheConfiguration() { ExpirationInMs = 10000 } }
+                        { DocumentType.Book, new DocumentTypeCacheConfiguration() { ExpirationInMs = 60000 } }
                     }
-                }
+                },
+                loggerFactory
             );
+
             var cachedFsDocumentsStore = new CachedDocumentsStore(fsDocumentsStore, documentsCache); // TODO check
 
             var documentsService = new DocumentsService(cachedFsDocumentsStore);

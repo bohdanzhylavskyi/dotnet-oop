@@ -1,38 +1,8 @@
 ﻿using DocumentsSearch.Documents;
+using Microsoft.Extensions.Logging;
 
 namespace DocumentsSearch
 {
-   //public class DocumentsCacheOptions
-   // {
-   //     public void AddLiveLongCachingForType(DocumentType type)
-   //     {
-
-   //     }
-
-   //     public void AddCachingForType(DocumentType type, int cacheExpirationInMs)
-   //     {
-
-   //     }
-   // }
-
-    //public class DocumentsCacheBuilder
-    //{
-    //    private Dictionary<DocumentType, >
-
-    //    public void AddLiveLongCachingForType(DocumentType type)
-    //    {
-    //    }
-
-    //    public void AddCachingForType(DocumentType type, int cacheExpirationInMs)
-    //    {
-    //    }
-
-    //    public DocumentsCache Build()
-    //    {
-    //        return new DocumentsCache();
-    //    }
-    //}
-
     public class DocumentTypeCacheConfiguration
     {
         public required int? ExpirationInMs;
@@ -51,46 +21,75 @@ namespace DocumentsSearch
 
     public class DocumentsCache
     {
-        // type - cache
-
         private Dictionary<string, DocumentsCacheRecord> cache = new();
         private DocumentsCacheConfiguration cacheConfiguration;
+        private ILogger<DocumentsCache> logger;
 
-
-        public DocumentsCache(DocumentsCacheConfiguration cacheConfiguration)
+        public DocumentsCache(DocumentsCacheConfiguration cacheConfiguration, ILoggerFactory loggerFactory)
         {
             this.cacheConfiguration = cacheConfiguration;
+            this.logger = loggerFactory.CreateLogger<DocumentsCache>();
         }
 
         public void Cache(DocumentType type, int documentNumber, Document document)
         {
+            this.logger.LogInformation($"Request to cache document with type={type} and documentNumber={documentNumber}");
+
             if (!this.isCachingForTypeEnabled(type))
             {
+                this.logger.LogInformation($"Caching for documentType={type} is disabled, document with type={type} and documentNumber={documentNumber} is not added to cache as cache for such document type is not enabled");
+
                 return;
             }
 
             var cacheKey = this.buildDocumentKey(type, documentNumber);
-
-            this.cache[cacheKey] = new DocumentsCacheRecord()
+            var cacheRecord = new DocumentsCacheRecord()
             {
                 Document = document,
                 CachedAt = DateTime.Now,
-
             };
+
+
+            this.cache[cacheKey] = cacheRecord;
+
+            this.logger.LogInformation($"Document with type={type} and documentNumber={documentNumber} is cached, cachedAt={cacheRecord.CachedAt}, cacheKey={cacheKey}");
         }
 
         public Document? TryGet(DocumentType type, int documentNumber)
         {
             var cacheKey = this.buildDocumentKey(type, documentNumber);
 
+            this.logger.LogInformation($"Request to retrieve document with type={type} and documentNumber={documentNumber} from cache using cacheKey={cacheKey}");
+
             this.cache.TryGetValue(cacheKey, out DocumentsCacheRecord cacheRecord);
 
-            if (cacheRecord != null && !this.isCacheExpired(type, cacheRecord.CachedAt))
+            if (cacheRecord == null)
             {
-                return cacheRecord.Document;
+                this.logger.LogInformation($"Document with type={type} and documentNumber={documentNumber} was not found in cache");
+
+                return null;
             }
 
-            return null;
+            if (this.isCacheExpired(type, cacheRecord.CachedAt))
+            {
+                this.logger.LogInformation($"Document with type={type} and documentNumber={documentNumber} was found in cache, but cache is expired");
+
+                return null;
+            }
+
+            var cacheExpiration = this.getCacheExpirationInMs(type);
+
+            if (cacheExpiration == null)
+            {
+                this.logger.LogInformation($"Document with type={type} and documentNumber={documentNumber} was retrieved from live-long cache");
+            }
+            else
+            {
+                var expireInMs = (cacheExpiration - (DateTime.Now - cacheRecord.CachedAt).TotalMilliseconds);
+                this.logger.LogInformation($"Document with type={type} and documentNumber={documentNumber} was retrieved from cache. Cache will expire in {expireInMs} miliseconds");
+            }
+
+            return cacheRecord.Document;
         }
 
         private bool isCachingForTypeEnabled(DocumentType type)
@@ -108,6 +107,11 @@ namespace DocumentsSearch
             }
 
             return (DateTime.Now - cacheCreatedAt).TotalMilliseconds > cacheConfig.ExpirationInMs;
+        }
+
+        private int? getCacheExpirationInMs(DocumentType type)
+        {
+            return this.cacheConfiguration.config[type].ExpirationInMs;
         }
 
         private string buildDocumentKey(DocumentType type, int documentNumber)
