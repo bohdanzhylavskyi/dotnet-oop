@@ -1,13 +1,13 @@
 ﻿using DocumentsSearch.Documents;
-using DocumentsSearch.DocumentStores;
+using DocumentsSearch.DocumentStorages;
 
 namespace DocumentsSearch
 {
     public class DocumentsService
     {
-        private IDocumentsStore documentsStore;
+        private IDocumentsStorage documentsStore;
 
-        public DocumentsService(IDocumentsStore documentsStore)
+        public DocumentsService(IDocumentsStorage documentsStore)
         {
             this.documentsStore = documentsStore;
         }

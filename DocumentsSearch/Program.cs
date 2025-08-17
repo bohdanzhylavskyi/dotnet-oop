@@ -1,8 +1,8 @@
 ﻿using DocumentsSearch.Documents;
-using DocumentsSearch.DocumentsStores;
-using DocumentsSearch.DocumentStores;
+using DocumentsSearch.DocumentsStorages;
+using DocumentsSearch.DocumentStorages;
+using DocumentsSearch.UIs;
 using Microsoft.Extensions.Logging;
-using System.Runtime.InteropServices;
 
 namespace DocumentsSearch
 {
@@ -19,18 +19,32 @@ namespace DocumentsSearch
                     .SetMinimumLevel(LogLevel.Information);
             });
 
-
-
             var docTypesRegistry = new DocumentTypesRegistry();
 
-            docTypesRegistry.Register(DocumentType.Book, typeof(Book));
-            docTypesRegistry.Register(DocumentType.Patent, typeof(Patent));
-            docTypesRegistry.Register(DocumentType.LocalizedBook, typeof(LocalizedBook));
-            docTypesRegistry.Register(DocumentType.Magazine, typeof(Magazine));
+            RegisterSupportedDocumentTypes(docTypesRegistry);
 
-            var documentDeserializer = new DocumentDeserializer(docTypesRegistry);
+            var documentsStorage = ConfigureDocumentsStorage(docTypesRegistry, loggerFactory);
+            var documentsService = new DocumentsService(documentsStorage);
 
-            var fsDocumentsStore = new FSDocumentsStore(documentDeserializer, DocumentsFolderPath);
+            var ui = new ConsoleUI(documentsService);
+
+            ui.Bootstrap();
+        }
+
+        static private void RegisterSupportedDocumentTypes(DocumentTypesRegistry registry)
+        {
+            registry.Register(DocumentType.Book, typeof(Book));
+            registry.Register(DocumentType.Patent, typeof(Patent));
+            registry.Register(DocumentType.LocalizedBook, typeof(LocalizedBook));
+            registry.Register(DocumentType.Magazine, typeof(Magazine));
+        }
+
+        static private IDocumentsStorage ConfigureDocumentsStorage(DocumentTypesRegistry registry, ILoggerFactory loggerFactory)
+        {
+            var documentDeserializer = new DocumentDeserializer(registry);
+
+            var fsDocumentsStorage = new FsDocumentsStorage(documentDeserializer, DocumentsFolderPath);
+
             var documentsCache = new DocumentsCache(
                 new DocumentsCacheConfiguration()
                 {
@@ -42,40 +56,9 @@ namespace DocumentsSearch
                 loggerFactory
             );
 
-            var cachedFsDocumentsStore = new CachedDocumentsStore(fsDocumentsStore, documentsCache); // TODO check
+            var cachedFsDocumentsStorage = new CachedDocumentsStorage(fsDocumentsStorage, documentsCache); // TODO check
 
-            var documentsService = new DocumentsService(cachedFsDocumentsStore);
-
-            while (true)
-            {
-                var input = Console.ReadLine();
-
-                if (input == "exit")
-                {
-                    break;
-                }
-
-                var documentNumber = int.Parse(input);
-                var searchResult = documentsService.SearchDocuments(documentNumber);
-
-                PrintSearchResult(searchResult);
-            }
-        }
-
-        private static void PrintSearchResult(List<DocumentCardInfo> infos)
-        {
-            Console.WriteLine("\nSearch Results:\n");
-
-            foreach (var info in infos)
-            {
-                foreach (var property in info.GetProperties())
-                {
-                    Console.WriteLine($"{property.Name}: {property.Value}");
-                }
-
-                Console.WriteLine("-------------------------");
-            }
-
+            return cachedFsDocumentsStorage;
         }
     }
 }

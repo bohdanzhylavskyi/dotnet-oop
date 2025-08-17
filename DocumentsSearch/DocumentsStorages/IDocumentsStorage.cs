@@ -1,6 +1,6 @@
 ﻿using DocumentsSearch.Documents;
 
-namespace DocumentsSearch.DocumentStores
+namespace DocumentsSearch.DocumentStorages
 {
     public class DocumentRecord
     {
@@ -8,7 +8,7 @@ namespace DocumentsSearch.DocumentStores
         public required int DocumentNumber { get; init; }
     }
 
-    public interface IDocumentsStore
+    public interface IDocumentsStorage
     {
         public List<DocumentRecord> ListDocumentRecords();
 

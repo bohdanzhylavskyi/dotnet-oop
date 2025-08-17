@@ -1,14 +1,14 @@
 ﻿using DocumentsSearch.Documents;
-using System.IO;
 
-namespace DocumentsSearch.DocumentStores
+namespace DocumentsSearch.DocumentStorages
 {
-    public class FSDocumentsStore : IDocumentsStore
+    public class FsDocumentsStorage : IDocumentsStorage
     {
+        private const string DocumentTypeNumberDelimiter = "_#";
         private DocumentDeserializer documentDeserializer;
         private string targetFolderPath;
 
-        public FSDocumentsStore(DocumentDeserializer documentDeserializer, string targetFolderPath)
+        public FsDocumentsStorage(DocumentDeserializer documentDeserializer, string targetFolderPath)
         {
             this.documentDeserializer = documentDeserializer;
             this.targetFolderPath = targetFolderPath;
@@ -21,26 +21,26 @@ namespace DocumentsSearch.DocumentStores
 
             foreach (var file in files)
             {
-                documentRecords.Add(this.parseDocumentFilename(file));
+                documentRecords.Add(this.ParseDocumentFilename(file));
             }
 
             return documentRecords;
 
         }
 
-        public Document ReadDocument(DocumentType type, int number)
+        public Document ReadDocument(DocumentType type, int documentNumber)
         {
-            var filename = $"{type.ToString().ToLower()}_#{number}.json";
+            var filename = BuildDocumentRecordFilename(type, documentNumber);
 
             string json = File.ReadAllText(Path.Combine(this.targetFolderPath, filename));
 
             return this.documentDeserializer.DeserializeFromJson(type, json);
         }
 
-        private DocumentRecord parseDocumentFilename(string filename)
+        private DocumentRecord ParseDocumentFilename(string filename)
         {
             string nameOnly = Path.GetFileNameWithoutExtension(filename);
-            string[] parts = nameOnly.Split("_#");
+            string[] parts = nameOnly.Split(DocumentTypeNumberDelimiter);
 
             string type = parts[0];
             int number = int.Parse(parts[1]);
@@ -50,6 +50,11 @@ namespace DocumentsSearch.DocumentStores
                 DocumentType = Enum.Parse<DocumentType>(type, ignoreCase: true),
                 DocumentNumber = number
             };
+        }
+
+        private string BuildDocumentRecordFilename(DocumentType type, int documentNumber)
+        {
+            return $"{type.ToString().ToLower()}{DocumentTypeNumberDelimiter}{documentNumber}.json";
         }
     }
 }

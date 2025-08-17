@@ -1,6 +1,11 @@
+- extend card info for each documents
+- add document type to card info
+- add logger to cache
+
+=========
+
 - improve result print
 - add validation for input
-- add document type to card info
-- extend card info for each documents
+
 - document type not supported?
 - add logger

@@ -18,7 +18,7 @@
             info.AddProperty("Document Type", "Localized Book");
             info.AddProperty("ISBN", this.ISBN);
             info.AddProperty("Title", this.Title);
-            info.AddProperty("Authors", string.Join(",", this.Authors.ToArray()));
+            info.AddProperty("Authors", string.Join(", ", this.Authors.ToArray()));
             info.AddProperty("Number Of Pages", this.PageCount.ToString());
             info.AddProperty("Original Publisher", this.OriginalPublisher);
             info.AddProperty("Country Of Localization", this.CountryOfLocalization);

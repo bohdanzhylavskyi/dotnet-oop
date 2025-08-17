@@ -17,7 +17,7 @@
 
             info.AddProperty("Document Type", "Patent");
             info.AddProperty("Title", this.Title);
-            info.AddProperty("Authors", string.Join(",", this.Authors.ToArray()));
+            info.AddProperty("Authors", string.Join(", ", this.Authors.ToArray()));
             info.AddProperty("Date Published", this.PublishDate.ToString());
             info.AddProperty("Expiration Date", this.ExpirationDate.ToString());
             info.AddProperty("Unique Id", this.Id);

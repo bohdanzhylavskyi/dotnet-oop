@@ -16,7 +16,7 @@
             info.AddProperty("Document Type", "Book");
             info.AddProperty("ISBN", this.ISBN);
             info.AddProperty("Title", this.Title);
-            info.AddProperty("Authors", string.Join(",", this.Authors.ToArray()));
+            info.AddProperty("Authors", string.Join(", ", this.Authors.ToArray()));
             info.AddProperty("Number Of Pages", this.PageCount.ToString());
             info.AddProperty("Publisher", this.Publisher);
             info.AddProperty("Date Published", this.PublishDate.ToString());

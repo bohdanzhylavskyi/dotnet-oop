@@ -1,14 +1,14 @@
 ﻿using DocumentsSearch.Documents;
-using DocumentsSearch.DocumentStores;
+using DocumentsSearch.DocumentStorages;
 
-namespace DocumentsSearch.DocumentsStores
+namespace DocumentsSearch.DocumentsStorages
 {
-    public class CachedDocumentsStore : IDocumentsStore
+    public class CachedDocumentsStorage : IDocumentsStorage
     {
-        private IDocumentsStore documentsStore;
+        private IDocumentsStorage documentsStore;
         private DocumentsCache documentsCache;
 
-        public CachedDocumentsStore(IDocumentsStore documentsStore, DocumentsCache documentsCache)
+        public CachedDocumentsStorage(IDocumentsStorage documentsStore, DocumentsCache documentsCache)
         {
             this.documentsStore = documentsStore;
             this.documentsCache = documentsCache;
