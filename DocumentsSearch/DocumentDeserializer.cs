@@ -24,7 +24,7 @@ namespace DocumentsSearch
         private DocumentTypesRegistry docTypesRegistry;
         private JsonSerializerOptions serializerOptions = new JsonSerializerOptions
         {
-            Converters = { new JsonDateOnlyConverter() },
+            Converters = { new JsonDateOnlyConverter(), new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
         };
 
         public DocumentDeserializer(DocumentTypesRegistry docTypesRegistry)

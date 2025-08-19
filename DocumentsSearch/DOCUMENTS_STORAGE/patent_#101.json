@@ -1,4 +1,6 @@
 {
+  "DocumentType": "patent",
+  "DocumentNumber": 101,
   "Id": "US20250001A1",
   "Title": "Method for Optimizing Database Queries",
   "Authors": [ "Martin Smith", "Laura Johnson" ],

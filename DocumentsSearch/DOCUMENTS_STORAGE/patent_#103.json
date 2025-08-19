@@ -1,4 +1,6 @@
 {
+  "DocumentType": "patent",
+  "DocumentNumber": 103,
   "Id": "US20250003A1",
   "Title": "Secure Cloud Storage System",
   "Authors": [ "Daniel Brown", "Emily Davis" ],

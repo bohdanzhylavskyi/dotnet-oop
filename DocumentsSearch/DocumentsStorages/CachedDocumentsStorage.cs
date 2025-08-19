@@ -5,32 +5,32 @@ namespace DocumentsSearch.DocumentsStorages
 {
     public class CachedDocumentsStorage : IDocumentsStorage
     {
-        private IDocumentsStorage documentsStore;
+        private IDocumentsStorage documentsStorage;
         private DocumentsCache documentsCache;
 
-        public CachedDocumentsStorage(IDocumentsStorage documentsStore, DocumentsCache documentsCache)
+        public CachedDocumentsStorage(IDocumentsStorage documentsStorage, DocumentsCache documentsCache)
         {
-            this.documentsStore = documentsStore;
+            this.documentsStorage = documentsStorage;
             this.documentsCache = documentsCache;
         }
 
         public List<DocumentRecord> ListDocumentRecords()
         {
-            return this.documentsStore.ListDocumentRecords();
+            return this.documentsStorage.ListDocumentRecords();
         }
 
-        public Document ReadDocument(DocumentType type, int number)
+        public Document ReadDocument(DocumentType type, int documentNumber)
         {
-            var cachedDocument = this.documentsCache.TryGet(type, number);
+            var cachedDocument = this.documentsCache.TryGet(type, documentNumber);
 
             if (cachedDocument != null)
             {
                 return cachedDocument;
             }
 
-            var document = this.documentsStore.ReadDocument(type, number);
+            var document = this.documentsStorage.ReadDocument(type, documentNumber);
 
-            this.documentsCache.Cache(type, number, document);
+            this.documentsCache.Cache(type, documentNumber, document);
 
             return document;
         }

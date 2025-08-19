@@ -12,6 +12,7 @@
             var info = new DocumentCardInfo();
 
             info.AddProperty("Document Type", "Magazine");
+            info.AddProperty("Document Number", this.DocumentNumber.ToString());
             info.AddProperty("Title", this.Title);
             info.AddProperty("Publisher", this.Publisher);
             info.AddProperty("Release Number", this.ReleaseNumber.ToString());

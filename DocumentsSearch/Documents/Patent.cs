@@ -16,6 +16,7 @@
             var info = new DocumentCardInfo();
 
             info.AddProperty("Document Type", "Patent");
+            info.AddProperty("Document Number", this.DocumentNumber.ToString());
             info.AddProperty("Title", this.Title);
             info.AddProperty("Authors", string.Join(", ", this.Authors.ToArray()));
             info.AddProperty("Date Published", this.PublishDate.ToString());

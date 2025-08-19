@@ -1,4 +1,6 @@
 {
+  "DocumentType": "Book",
+  "DocumentNumber": 1004,
   "ISBN": "978-0-201-52017-7",
   "Title": "The C Programming Language",
   "Authors": [ "Brian W. Kernighan", "Dennis M. Ritchie" ],

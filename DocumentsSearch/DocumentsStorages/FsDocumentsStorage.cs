@@ -1,4 +1,5 @@
 ﻿using DocumentsSearch.Documents;
+using Microsoft.Extensions.Logging;
 
 namespace DocumentsSearch.DocumentStorages
 {
@@ -7,11 +8,16 @@ namespace DocumentsSearch.DocumentStorages
         private const string DocumentTypeNumberDelimiter = "_#";
         private DocumentDeserializer documentDeserializer;
         private string targetFolderPath;
+        private ILogger<FsDocumentsStorage> logger;
 
-        public FsDocumentsStorage(DocumentDeserializer documentDeserializer, string targetFolderPath)
+        public FsDocumentsStorage(
+            DocumentDeserializer documentDeserializer,
+            string targetFolderPath,
+            ILoggerFactory loggerFactory)
         {
             this.documentDeserializer = documentDeserializer;
             this.targetFolderPath = targetFolderPath;
+            this.logger = loggerFactory.CreateLogger<FsDocumentsStorage>();
         }
 
         public List<DocumentRecord> ListDocumentRecords()
@@ -19,9 +25,16 @@ namespace DocumentsSearch.DocumentStorages
             string[] files = Directory.GetFiles(this.targetFolderPath);
             List<DocumentRecord> documentRecords = new();
 
-            foreach (var file in files)
+            foreach (var filename in files)
             {
-                documentRecords.Add(this.ParseDocumentFilename(file));
+                var parsedDocumentRecord = this.TryParseDocumentDocumentRecord(filename);
+
+                if (parsedDocumentRecord != null)
+                {
+                    documentRecords.Add(parsedDocumentRecord);
+                } else {
+                    this.logger.LogWarning($"Skip file with filename={filename} as it can't be parsed to valid document record");
+                }
             }
 
             return documentRecords;
@@ -31,25 +44,34 @@ namespace DocumentsSearch.DocumentStorages
         public Document ReadDocument(DocumentType type, int documentNumber)
         {
             var filename = BuildDocumentRecordFilename(type, documentNumber);
+            var filePath = Path.Combine(this.targetFolderPath, filename);
 
-            string json = File.ReadAllText(Path.Combine(this.targetFolderPath, filename));
+            string json = File.ReadAllText(filePath);
 
             return this.documentDeserializer.DeserializeFromJson(type, json);
         }
 
-        private DocumentRecord ParseDocumentFilename(string filename)
+        private DocumentRecord? TryParseDocumentDocumentRecord(string filename)
         {
-            string nameOnly = Path.GetFileNameWithoutExtension(filename);
-            string[] parts = nameOnly.Split(DocumentTypeNumberDelimiter);
-
-            string type = parts[0];
-            int number = int.Parse(parts[1]);
-
-            return new DocumentRecord()
+            try
             {
-                DocumentType = Enum.Parse<DocumentType>(type, ignoreCase: true),
-                DocumentNumber = number
-            };
+                string nameOnly = Path.GetFileNameWithoutExtension(filename);
+                string[] parts = nameOnly.Split(DocumentTypeNumberDelimiter);
+
+                string type = parts[0];
+                int number = int.Parse(parts[1]);
+
+                return new DocumentRecord()
+                {
+                    DocumentType = Enum.Parse<DocumentType>(type, ignoreCase: true),
+                    DocumentNumber = number
+                };
+            } catch (Exception e)
+            {
+                this.logger.LogWarning(e, $"Failed to parse document record from file with filename={filename}");
+
+                return null;
+            }
         }
 
         private string BuildDocumentRecordFilename(DocumentType type, int documentNumber)

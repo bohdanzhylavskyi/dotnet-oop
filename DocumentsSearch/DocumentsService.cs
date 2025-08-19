@@ -15,7 +15,11 @@ namespace DocumentsSearch
         public List<DocumentCardInfo> SearchDocuments(int documentNumber)
         {
             var records = this.documentsStore.ListDocumentRecords();
-            var matchedRecords = records.FindAll(r => r.DocumentNumber.ToString().Contains(documentNumber.ToString()));
+            
+            var matchedRecords = records.FindAll(
+                r => r.DocumentNumber.ToString()
+                    .Contains(documentNumber.ToString())
+            );
 
             var documents = new List<Document>();
 
@@ -26,7 +30,7 @@ namespace DocumentsSearch
                 documents.Add(document);
             }
 
-            return documents.Select(d => d.GetInfo()).ToList();
+            return documents.ConvertAll(d => d.GetInfo());
         }
     }
 }

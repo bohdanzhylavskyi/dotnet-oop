@@ -1,4 +1,6 @@
 {
+  "DocumentType": "magazine",
+  "DocumentNumber": 100002,
   "Title": "Code Weekly",
   "Publisher": "DevPress",
   "PublishDate": "2025-02-05",

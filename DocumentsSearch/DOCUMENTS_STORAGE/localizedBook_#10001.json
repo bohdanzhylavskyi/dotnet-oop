@@ -1,4 +1,6 @@
 {
+  "DocumentType": "LocalizedBook",
+  "DocumentNumber": 10001,
   "ISBN": "978-1-4842-4656-8",
   "Title": "Pro C# 9 with .NET 5",
   "Authors": [ "Andrew Troelsen", "Philip Japikse" ],

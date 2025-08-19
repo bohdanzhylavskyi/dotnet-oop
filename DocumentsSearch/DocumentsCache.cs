@@ -3,14 +3,30 @@ using Microsoft.Extensions.Logging;
 
 namespace DocumentsSearch
 {
-    public class DocumentTypeCacheConfiguration
+    public struct DocumentTypeCacheConfiguration
     {
         public required int? ExpirationInMs;
     }
 
-    public class DocumentsCacheConfiguration
+    public struct DocumentsCacheConfiguration
     {
-        public required Dictionary<DocumentType, DocumentTypeCacheConfiguration> config; // TODO: check
+        private Dictionary<DocumentType, DocumentTypeCacheConfiguration> config;
+
+        public DocumentsCacheConfiguration(Dictionary<DocumentType, DocumentTypeCacheConfiguration> config)
+        {
+            this.config = config;
+        }
+
+        public DocumentTypeCacheConfiguration GetCacheConfig(DocumentType type)
+        {
+            return this.config[type];
+        }
+
+        public bool ContainsCacheConfig(DocumentType type)
+        {
+            return this.config.ContainsKey(type);
+        }
+
     }
 
     public class DocumentsCacheRecord
@@ -94,24 +110,24 @@ namespace DocumentsSearch
 
         private bool IsCachingForTypeEnabled(DocumentType type)
         {
-            return this.cacheConfiguration.config.ContainsKey(type);
+            return this.cacheConfiguration.ContainsCacheConfig(type);
         }
 
         private bool IsCacheExpired(DocumentType type, DateTime cacheCreatedAt)
         {
-            var cacheConfig = this.cacheConfiguration.config[type];
+            var cacheExpirationInMs = this.GetCacheExpirationInMs(type);
 
-            if (cacheConfig.ExpirationInMs == null)
+            if (cacheExpirationInMs == null)
             {
                 return false;
             }
 
-            return (DateTime.Now - cacheCreatedAt).TotalMilliseconds > cacheConfig.ExpirationInMs;
+            return (DateTime.Now - cacheCreatedAt).TotalMilliseconds > cacheExpirationInMs;
         }
 
         private int? GetCacheExpirationInMs(DocumentType type)
         {
-            return this.cacheConfiguration.config[type].ExpirationInMs;
+            return this.cacheConfiguration.GetCacheConfig(type).ExpirationInMs;
         }
 
         private string BuildDocumentKey(DocumentType type, int documentNumber)

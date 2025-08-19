@@ -1,4 +1,6 @@
 {
+  "DocumentType": "patent",
+  "DocumentNumber": 104,
   "Id": "US20250004A1",
   "Title": "Blockchain-Based Voting Method",
   "Authors": [ "Michael Lee", "Anna Wilson" ],

@@ -8,7 +8,7 @@ namespace DocumentsSearch
 {
     internal class Program
     {
-        static string DocumentsFolderPath = "./documents-store";
+        static string DocumentsFolderPath = "./DOCUMENTS_STORAGE";
 
         static void Main(string[] args)
         {
@@ -16,7 +16,7 @@ namespace DocumentsSearch
             {
                 builder
                     .AddDebug()
-                    .SetMinimumLevel(LogLevel.Information);
+                    .SetMinimumLevel(LogLevel.Debug);
             });
 
             var docTypesRegistry = new DocumentTypesRegistry();
@@ -33,8 +33,8 @@ namespace DocumentsSearch
 
         static private void RegisterSupportedDocumentTypes(DocumentTypesRegistry registry)
         {
-            registry.Register(DocumentType.Book, typeof(Book));
             registry.Register(DocumentType.Patent, typeof(Patent));
+            registry.Register(DocumentType.Book, typeof(Book));
             registry.Register(DocumentType.LocalizedBook, typeof(LocalizedBook));
             registry.Register(DocumentType.Magazine, typeof(Magazine));
         }
@@ -43,22 +43,20 @@ namespace DocumentsSearch
         {
             var documentDeserializer = new DocumentDeserializer(registry);
 
-            var fsDocumentsStorage = new FsDocumentsStorage(documentDeserializer, DocumentsFolderPath);
+            var fsDocumentsStorage = new FsDocumentsStorage(documentDeserializer, DocumentsFolderPath, loggerFactory);
 
             var documentsCache = new DocumentsCache(
-                new DocumentsCacheConfiguration()
-                {
-                    config = new Dictionary<DocumentType, DocumentTypeCacheConfiguration>()
+                new DocumentsCacheConfiguration(
+                    new Dictionary<DocumentType, DocumentTypeCacheConfiguration>()
                     {
-                        { DocumentType.Book, new DocumentTypeCacheConfiguration() { ExpirationInMs = 60000 } }
+                        { DocumentType.Patent, new DocumentTypeCacheConfiguration() { ExpirationInMs = null } },
+                        { DocumentType.Book, new DocumentTypeCacheConfiguration() { ExpirationInMs = 30000 } }
                     }
-                },
+                ),
                 loggerFactory
             );
 
-            var cachedFsDocumentsStorage = new CachedDocumentsStorage(fsDocumentsStorage, documentsCache); // TODO check
-
-            return cachedFsDocumentsStorage;
+            return new CachedDocumentsStorage(fsDocumentsStorage, documentsCache);
         }
     }
 }

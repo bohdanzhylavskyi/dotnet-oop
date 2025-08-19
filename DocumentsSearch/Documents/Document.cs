@@ -27,6 +27,9 @@
 
     public abstract class Document
     {
+        public required DocumentType DocumentType { get; init; }
+        public required int DocumentNumber { get; init; }
+
         public abstract DocumentCardInfo GetInfo();
     }
 }

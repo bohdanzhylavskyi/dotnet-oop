@@ -16,6 +16,7 @@
             var info = new DocumentCardInfo();
 
             info.AddProperty("Document Type", "Localized Book");
+            info.AddProperty("Document Number", this.DocumentNumber.ToString());
             info.AddProperty("ISBN", this.ISBN);
             info.AddProperty("Title", this.Title);
             info.AddProperty("Authors", string.Join(", ", this.Authors.ToArray()));
