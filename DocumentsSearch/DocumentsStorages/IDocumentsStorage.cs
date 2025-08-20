@@ -12,6 +12,6 @@ namespace DocumentsSearch.DocumentStorages
     {
         public List<DocumentRecord> ListDocumentRecords();
 
-        public Document ReadDocument(DocumentType type, int number);
+        public Document ReadDocument(DocumentType type, int documentNumber);
     }
 }

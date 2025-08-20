@@ -19,11 +19,11 @@ namespace DocumentsSearch
                     .SetMinimumLevel(LogLevel.Debug);
             });
 
-            var docTypesRegistry = new DocumentTypesRegistry();
+            var documentTypesRegistry = new DocumentTypesRegistry();
 
-            RegisterSupportedDocumentTypes(docTypesRegistry);
+            RegisterSupportedDocumentTypes(documentTypesRegistry);
 
-            var documentsStorage = ConfigureDocumentsStorage(docTypesRegistry, loggerFactory);
+            var documentsStorage = ConfigureDocumentsStorage(documentTypesRegistry, loggerFactory);
             var documentsService = new DocumentsService(documentsStorage);
 
             var ui = new ConsoleUI(documentsService);
@@ -31,28 +31,30 @@ namespace DocumentsSearch
             ui.Bootstrap();
         }
 
-        static private void RegisterSupportedDocumentTypes(DocumentTypesRegistry registry)
+        static private void RegisterSupportedDocumentTypes(DocumentTypesRegistry documentTypesRegistry)
         {
-            registry.Register(DocumentType.Patent, typeof(Patent));
-            registry.Register(DocumentType.Book, typeof(Book));
-            registry.Register(DocumentType.LocalizedBook, typeof(LocalizedBook));
-            registry.Register(DocumentType.Magazine, typeof(Magazine));
+            documentTypesRegistry.Register(DocumentType.Patent, typeof(Patent));
+            documentTypesRegistry.Register(DocumentType.Book, typeof(Book));
+            documentTypesRegistry.Register(DocumentType.LocalizedBook, typeof(LocalizedBook));
+            documentTypesRegistry.Register(DocumentType.Magazine, typeof(Magazine));
         }
 
-        static private IDocumentsStorage ConfigureDocumentsStorage(DocumentTypesRegistry registry, ILoggerFactory loggerFactory)
+        static private IDocumentsStorage ConfigureDocumentsStorage(DocumentTypesRegistry documentTypesRegistry, ILoggerFactory loggerFactory)
         {
-            var documentDeserializer = new DocumentDeserializer(registry);
+            var documentDeserializer = new DocumentDeserializer(documentTypesRegistry);
 
             var fsDocumentsStorage = new FsDocumentsStorage(documentDeserializer, DocumentsFolderPath, loggerFactory);
 
+            var documentsCacheConfiguration = new DocumentsCacheConfiguration(
+                new Dictionary<DocumentType, DocumentTypeCacheConfiguration>()
+                {
+                    { DocumentType.Patent, new DocumentTypeCacheConfiguration() { ExpirationInMs = null } },
+                    { DocumentType.Book, new DocumentTypeCacheConfiguration() { ExpirationInMs = 30000 } }
+                }
+            );
+
             var documentsCache = new DocumentsCache(
-                new DocumentsCacheConfiguration(
-                    new Dictionary<DocumentType, DocumentTypeCacheConfiguration>()
-                    {
-                        { DocumentType.Patent, new DocumentTypeCacheConfiguration() { ExpirationInMs = null } },
-                        { DocumentType.Book, new DocumentTypeCacheConfiguration() { ExpirationInMs = 30000 } }
-                    }
-                ),
+                documentsCacheConfiguration,
                 loggerFactory
             );
 

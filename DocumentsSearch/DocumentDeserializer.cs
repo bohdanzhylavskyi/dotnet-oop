@@ -21,22 +21,22 @@ namespace DocumentsSearch
 
     public class DocumentDeserializer
     {
-        private DocumentTypesRegistry docTypesRegistry;
+        private DocumentTypesRegistry documentTypesRegistry;
         private JsonSerializerOptions serializerOptions = new JsonSerializerOptions
         {
             Converters = { new JsonDateOnlyConverter(), new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
         };
 
-        public DocumentDeserializer(DocumentTypesRegistry docTypesRegistry)
+        public DocumentDeserializer(DocumentTypesRegistry documentTypesRegistry)
         {
-            this.docTypesRegistry = docTypesRegistry;
+            this.documentTypesRegistry = documentTypesRegistry;
         }
 
         public Document DeserializeFromJson(DocumentType type, string json)
         {
             return (Document)JsonSerializer.Deserialize(
                 json,
-                this.docTypesRegistry.ResolveImplementationType(type),
+                this.documentTypesRegistry.ResolveImplementationType(type),
                 this.serializerOptions
             );
         }

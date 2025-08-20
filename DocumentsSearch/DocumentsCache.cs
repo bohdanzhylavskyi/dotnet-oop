@@ -51,9 +51,9 @@ namespace DocumentsSearch
         {
             this.logger.LogDebug($"Request to cache document with type={type} and documentNumber={documentNumber}");
 
-            if (!this.IsCachingForTypeEnabled(type))
+            if (!this.IsCachingForDocumentTypeEnabled(type))
             {
-                this.logger.LogDebug($"Caching for documentType={type} is disabled, document with type={type} and documentNumber={documentNumber} is not added to cache as cache for such document type is not enabled");
+                this.logger.LogDebug($"Caching for documentType={type} is disabled, document with type={type} and documentNumber={documentNumber} was not added to cache as caching for such document type is not enabled");
 
                 return;
             }
@@ -68,7 +68,7 @@ namespace DocumentsSearch
 
             this.cache[cacheKey] = cacheRecord;
 
-            this.logger.LogDebug($"Document with type={type} and documentNumber={documentNumber} is cached, cachedAt={cacheRecord.CachedAt}, cacheKey={cacheKey}");
+            this.logger.LogDebug($"Document with type={type} and documentNumber={documentNumber} was cached, cachedAt={cacheRecord.CachedAt}, cacheKey={cacheKey}");
         }
 
         public Document? TryGet(DocumentType type, int documentNumber)
@@ -102,13 +102,13 @@ namespace DocumentsSearch
             else
             {
                 var expireInMs = (cacheExpiration - (DateTime.Now - cacheRecord.CachedAt).TotalMilliseconds);
-                this.logger.LogDebug($"Document with type={type} and documentNumber={documentNumber} was retrieved from cache. Cache will expire in {expireInMs} miliseconds");
+                this.logger.LogDebug($"Document with type={type} and documentNumber={documentNumber} was retrieved from cache. Cache will expire in {expireInMs} milliseconds");
             }
 
             return cacheRecord.Document;
         }
 
-        private bool IsCachingForTypeEnabled(DocumentType type)
+        private bool IsCachingForDocumentTypeEnabled(DocumentType type)
         {
             return this.cacheConfiguration.ContainsCacheConfig(type);
         }
