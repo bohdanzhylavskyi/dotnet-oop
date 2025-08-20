@@ -13,31 +13,32 @@ namespace DocumentsSearch.UIs
         {
             while (true)
             {
-                Console.WriteLine("Enter document number query (or 'exit' to close the app):");
+                Console.WriteLine("Enter document number query (or 'exit' to close the app / 'clear' to clear console):");
 
-                var input = Console.ReadLine();
+                var query = Console.ReadLine();
 
-                if (input == "exit")
+                if (query == "exit")
                 {
                     break;
                 }
 
-                if (!this.TryParseDocumentNumberQuery(input, out int documentNumber))
+                if (query == "clear")
                 {
-                    Console.WriteLine("\nInvalid search query was provided, document number is expected\n");
+                    Console.Clear();
+                    continue;
+                }
+
+                if (!DocumentNumberQuery.TryParse(query, out DocumentNumberQuery documentNumberQuery))
+                {
+                    Console.WriteLine("\nInvalid search query was provided, document number query is expected\n");
 
                     continue;
                 }
 
-                var searchResult = this.documentsService.SearchDocuments(documentNumber);
+                var searchResult = this.documentsService.SearchDocuments(documentNumberQuery);
 
                 PrintSearchResult(searchResult);
             }
-        }
-
-        private bool TryParseDocumentNumberQuery(string searchQuery, out int documentNumber)
-        {
-            return int.TryParse(searchQuery, out documentNumber);
         }
 
         private static void PrintSearchResult(List<DocumentCardInfo> infos)

@@ -12,13 +12,13 @@ namespace DocumentsSearch
             this.documentsStore = documentsStore;
         }
 
-        public List<DocumentCardInfo> SearchDocuments(int documentNumber)
+        public List<DocumentCardInfo> SearchDocuments(DocumentNumberQuery documentNumberQuery)
         {
             var records = this.documentsStore.ListDocumentRecords();
             
             var matchedRecords = records.FindAll(
                 r => r.DocumentNumber.ToString()
-                    .Contains(documentNumber.ToString())
+                    .Contains(documentNumberQuery.ToString())
             );
 
             var documents = new List<Document>();
